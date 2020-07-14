@@ -289,6 +289,6 @@ if __name__ == "__main__":
     # Register/Unregister StockrowServer example
     # eg. at the command line: py stockrow_rtd.py --register
     # Then type in an excel cell something like:
-    # =RTD("STOCKROW","","MSFT","price")
+    # =RTD("STOCKROW","","MSFT","last_price")
     
     win32com.server.register.UseCommandLine(StockrowServer)
