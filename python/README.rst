@@ -14,7 +14,6 @@ Type ``py <python file name>--register``
 
 Demo
 ====================
-* Stockrow RTD: `Stockrow Demo1`_, `Stockrow Demo2`_
+* Stockrow RTD:
 
-.. _Stockrow Demo1: https://github.com/chaelim/ExcelRTD/blob/master/python/stockrow_rtd_demo1.gif
-.. _Stockrow Demo2: https://github.com/chaelim/ExcelRTD/blob/master/python/stockrow_rtd_demo2.gif
+.. image:: demo\stockrow_rtd_demo1.gif
