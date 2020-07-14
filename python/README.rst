@@ -1,12 +1,13 @@
 Python Prerequisites
 ==============================
-1. Install `pywin32`_
+* Install `pywin32`_
 
 .. _pywin32: https://github.com/mhammond/pywin32/releases
 
-Python Sample ``STOCKROW`` RTD
-==============================
-To install STOCLROW RTD::
+Register Python RTD 
+====================
+To install Python Excel RTD COM server::
 
-1. Go to python folder
-2. Type ``py stockrow_rtd.py --register``
+Type ``py <python file name>--register``
+
+  e.g. ``py stockrow_rtd.py --register``
