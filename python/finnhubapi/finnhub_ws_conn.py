@@ -137,7 +137,7 @@ def finnhub_test_main():
 
     global finnhub_client
     finnhub_client = FinnhubClient()
-    finnhub_client.connect(on_recv_message, "bs0mtcvrh5r9tup3e5j0")
+    finnhub_client.connect(on_recv_message, "YOUR_FINNHUB_TOKEN")
     finnhub_client.send('{"type":"subscribe","symbol":"MSFT"}')
     finnhub_client.send('{"type":"subscribe","symbol":"BINANCE:BTCUSDT"}')
     while True:

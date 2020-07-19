@@ -1,6 +1,6 @@
 """Excel RTD (RealTimeData) Server sample for real-time stock quote.
 
-Using Finnhub real-time websocket Trades
+Using Finnhub real-time websocket: https://finnhub.io/docs/api#websocket-trades
 """
 import excel_rtd as rtd
 import finnhubapi as fa
@@ -20,7 +20,7 @@ from aiohttp import ClientSession
 LOG_FILE_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'logs')
 LOG_FILENAME = os.path.join(LOG_FILE_FOLDER, 'Finnhub_{:%Y%m%d_%H%M%S}.log'.format(datetime.now()))
 
-# Finnhub token can be set here or pas the token through "set_token" command using RTD (see demo\Finnhub_rtd_demo.xlsx)
+# Finnhub token can be set here or pass the token through "set_token" command using RTD (see demo\Finnhub_rtd_demo.xlsx)
 FINHUB_TOKEN = ""
 
 if not os.path.exists(LOG_FILE_FOLDER):

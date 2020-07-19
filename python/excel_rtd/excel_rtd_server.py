@@ -1,6 +1,6 @@
 # Origianl from https://github.com/mhammond/pywin32/blob/master/com/win32com/demos/excelRTDServer.py
 # and slightly modified.
-# e.g. Support calling SignalExcel from a different worker thread than Excel's main thread.
+# e.g. Support for calling SignalExcel from a different python worker thread, not from the Excel's main thread.
 
 """Excel IRTDServer implementation.
 
