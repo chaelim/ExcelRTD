@@ -9,10 +9,10 @@
 
 * You should choose matching installation file with your Python version and bitness.
 * For Python 3.8 64bit, use `pywin32-228.win-amd64-py3.8.exe`
-* __IMPORTANT__: Two DLL files under `<Your Python Installation Path>\Lib\site-packages\pywin32_system32` need to be added to the `PATH` environment variable.
-    * Alternatively, you can copy the DLL files (`pythoncom38.dll` and `pywintypes38.dll`) under `<Your Python Installation Path>\Lib\site-packages\pywin32_system32` to `<Your Python Installation Path>` assuming that is already in the `PATH` environment variable.
-    * If you didn't change Python installation folder dfrom the Python Installer, default Python installation folder would be `C:\User\<Your UserName>\AppData\Local\Programs\Python\Python38` or `%LOCALAPPDATA%\Programs\Python\Python38`.
-    * [This web page](https://datatofish.com/add-python-to-windows-path/) describes how to add Python application path to the `PATH` environment variable.
+* __IMPORTANT__: This folder  `<Your Python Installation Path>\Lib\site-packages\pywin32_system32` need to be added to the `PATH` environment variable.
+    * Alternatively (This is what I'm doing), you can copy the two DLL files (`pythoncom38.dll` and `pywintypes38.dll`) under the `<Your Python Installation Path>\Lib\site-packages\pywin32_system32` to `<Your Python Installation Path>` assuming that is already in the `PATH` environment variable.
+    * If you didn't change Python installation folder from the Python Installer, default Python installation folder would be `C:\User\<Your UserName>\AppData\Local\Programs\Python\Python38` or `%LOCALAPPDATA%\Programs\Python\Python38`.
+    * If your Python application path was not added to the `PATH` environment variable at the Python installation time, you can follow instructions in [this web page](https://datatofish.com/add-python-to-windows-path/) to add Python application path to the `PATH` environment variable.
 
 # Hot to register a Python RTD
 
