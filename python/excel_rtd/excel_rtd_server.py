@@ -1,6 +1,6 @@
-# Origianl from https://github.com/mhammond/pywin32/blob/master/com/win32com/demos/excelRTDServer.py
-# and slightly modified.
-# e.g. Support for calling SignalExcel from a different python worker thread, not from the Excel's main thread.
+# Originally from https://github.com/mhammond/pywin32/blob/master/com/win32com/demos/excelRTDServer.py and slightly modified.
+# - Added support for calling SignalExcel from a different python worker thread, not from the Excel's main thread.
+# - RefreshData in RTDServer only sends new values in "self.updatedTopics" list to Excel.
 
 """Excel IRTDServer implementation.
 
@@ -149,11 +149,10 @@ class RTDServer(object):
       raise COMException(desc=repr(e))
 
     """
-    On File Load only, the input value for GetNewValues will be false, meaning "no, the RTDServer doesn't HAVE to give Excel new data."
-    If the server keeps it as false, it doesn't have to send any data back; if it does Excel will ignore it. If the server changes GetNewValues to "true,"
-    it has to send back a new value (which will cause Excel to throw away the old value). Not sending a new value will result in a #N/A.
-    Another way to think about this: GetNewValues is False if the ConnectData is due the user opening a file with existing RTD formulas in it, and True in all other cases.
-    Note: this only applies to files saved in the Excel binary and xml format (.XLS) because old values are not stored in HTML files saved by Excel.
+    If this is called during the file load, GetNewValues will be False and doesn't need to send Excel new data. 
+    If we change "GetNewValues" to True on file load, we have to send back new data. If we don't send a new value, it will result in a #N/A.
+    GetNewValues input value is False if the ConnectData is called while user is opening a file with existing RTD formulas in it.
+    In other cases (e.g. user entered a new RTD formula) it will be True.
     """
     if GetNewValues:
       result = self.topics[TopicID]
@@ -163,6 +162,7 @@ class RTDServer(object):
         result = result.GetValue()
     else:
       # Tell Excel use a cached value
+      # Note: Excel can use the cached value only for the binary (.xlb and .xls) format files.
       result = None
 
     # fire out internal event...

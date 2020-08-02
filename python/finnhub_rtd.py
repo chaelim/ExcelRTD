@@ -250,7 +250,7 @@ class StockTickTopic(rtd.RTDTopic):
 
         # setup our initial value
         self.checkpoint = self.timestamp()
-        self.SetValue(0)
+        self.SetValue("N/A")
 
     def __key(self):
         return (self.ticker, self.field)
