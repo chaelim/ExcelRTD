@@ -14,14 +14,23 @@
     * If you didn't change Python installation folder from the Python Installer, default Python installation folder would be `C:\User\<Your UserName>\AppData\Local\Programs\Python\Python38` or `%LOCALAPPDATA%\Programs\Python\Python38`.
     * If your Python application path was not added to the `PATH` environment variable at the Python installation time, you can follow instructions in [this web page](https://datatofish.com/add-python-to-windows-path/) to add Python application path to the `PATH` environment variable.
 
-## Install dependent packages
+## Install required packages
+
 * Run `pip install -r requirements.txt` or `py -m pip install -r requirements.txt`
 
-# Hot to register a Python RTD
+## How to register a Python RTD
 
 * To install Python Excel RTD COM server:
     * Type `py <python file name> --register`
     * e.g. ``py stockrow_rtd.py --register``
+
+## Change `RTDThrottleInterval` to zero (recommended)
+
+* By setting `RTDThrottleInterval` to zero, any update from the RTD COM server will be refreshed to Excel as quickly as possible.
+
+* Use either of following ways to change `RTDThrottleInterval` value to zero
+  1. Type this command line `reg add HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\16.0\Excel\Options /v RTDThrottleInterval /t REG_DWORD /d 0 /f`
+  2. Run `DisableThrottling.reg` (You can doule click this from the explorer)
 
 # Demo
 
