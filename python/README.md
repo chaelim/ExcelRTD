@@ -1,9 +1,16 @@
-# Python Prerequisites
+# Prerequisites
+
+## Excel version
+
+* __IMPORTANT__: Office 365 Version 1909 (16.0.12130.20XXX) or later is required
+* Due to the issue described [here](https://mail.python.org/pipermail/python-win32/2012-April/012207.html), it won't work in older builds.
 
 ## Python version 3.x for Windows
 
 * Install it from https://www.python.org/downloads/windows
 * Recommend install 64 bit (x64) build
+
+# Setup
 
 ## Install [pywin32](https://github.com/mhammond/pywin32/releases)
 
