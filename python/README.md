@@ -29,8 +29,8 @@
 * By setting `RTDThrottleInterval` to zero, any update from the RTD COM server will be refreshed to Excel as quickly as possible.
 
 * Use either of following ways to change `RTDThrottleInterval` value to zero
-  1. Type this command line `reg add HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\16.0\Excel\Options /v RTDThrottleInterval /t REG_DWORD /d 0 /f`
-  2. Run `DisableThrottling.reg` (You can doule click this from the explorer)
+  1. Type this command line `reg add HKCU\SOFTWARE\Microsoft\Office\16.0\Excel\Options /v RTDThrottleInterval /t REG_DWORD /d 0 /f`
+  2. Run `DisableThrottling.reg` (You can double click this from the explorer)
 
 # Demo
 
