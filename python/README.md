@@ -14,6 +14,9 @@
     * If you didn't change Python installation folder from the Python Installer, default Python installation folder would be `C:\User\<Your UserName>\AppData\Local\Programs\Python\Python38` or `%LOCALAPPDATA%\Programs\Python\Python38`.
     * If your Python application path was not added to the `PATH` environment variable at the Python installation time, you can follow instructions in [this web page](https://datatofish.com/add-python-to-windows-path/) to add Python application path to the `PATH` environment variable.
 
+## Install dependent packages
+* Run `pip install -r requirements.txt` or `py -m pip install -r requirements.txt`
+
 # Hot to register a Python RTD
 
 * To install Python Excel RTD COM server:
