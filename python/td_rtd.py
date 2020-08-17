@@ -1,9 +1,7 @@
 """Excel RTD (RealTimeData) Server sample for real-time stock quote.
-
-Using Finnhub real-time websocket: https://finnhub.io/docs/api#websocket-trades
 """
 import excel_rtd as rtd
-import finnhubapi as fa
+import tdapi as ta
 from datetime import datetime
 import threading
 import pythoncom
@@ -16,43 +14,36 @@ import time
 import asyncio
 import json
 
-LOG_FILE_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'logs')
-LOG_FILENAME = os.path.join(LOG_FILE_FOLDER, 'Finnhub_{:%Y%m%d_%H%M%S}.log'.format(datetime.now()))
+from typing import List
 
-# Finnhub token can be set here or pass the token through "set_token" command using RTD (see demo\Finnhub_rtd_demo.xlsx)
-FINHUB_TOKEN = "bsacbsvrh5rfukjh2o0g"
+LOG_FILE_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'logs')
+LOG_FILENAME = os.path.join(LOG_FILE_FOLDER, 'TD_{:%Y%m%d_%H%M%S}.log'.format(datetime.now()))
 
 if not os.path.exists(LOG_FILE_FOLDER):
     os.makedirs(LOG_FILE_FOLDER)
 
 logging.basicConfig(
     filename=LOG_FILENAME,
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s:%(levelname)s:%(message)s"
 )
 
-class FinnhubServer(rtd.RTDServer):
-    _reg_clsid_ = '{1540C97E-BD8B-444E-9F18-B38FB33711E5}'
-    _reg_progid_ = 'FINNHUB'
+class TDServer(rtd.RTDServer):
+    _reg_clsid_ = '{E28CFA65-CC94-455E-BF49-DCBCEBD17154}'
+    _reg_progid_ = 'TD.RTD'
     _reg_desc_ = "RTD server for realtime stock quote"
 
     # other class attributes...
 
     def __init__(self):
-        super(FinnhubServer, self).__init__()
-        self.finnhub_cli = fa.FinnhubClient()
+        super(TDServer, self).__init__()
+        self.td_cli = ta.create_td_client()
         self.start_conn_event = threading.Event()
         self.async_loop = None
 
-        if FINHUB_TOKEN:
-            self.start_conn_event.set()
-            self.finnhub_token = FINHUB_TOKEN
-        else:
-            self.finnhub_token = None
-
         self.topics_by_key = {}
 
-        self.update_thread = threading.Thread(target = self.update_thread_handler)
+        self.update_thread = threading.Thread(target=self.update_thread_handler)
         self.shutdown = False
 
     def OnServerStart(self):
@@ -67,40 +58,21 @@ class FinnhubServer(rtd.RTDServer):
 
         self.shutdown = True
 
-        if self.finnhub_cli:
-            self.finnhub_cli.close()
-            self.finnhub_cli = None
+        if self.td_cli:
+            self.td_cli.close()
+            self.td_cli = None
 
         if not self.start_conn_event.is_set():
             self.start_conn_event.set()
+
         if not self.ready_to_send.is_set():
             self.ready_to_send.set()
 
         self.start_conn_event.clear()
         self.ready_to_send.clear()
 
-    def _on_recv_message(self, message) -> None:
-        # e.g. {"data":[{"p":379.6,"s":"AAPL","t":1594228987324,"v":21}],"type":"trade"}
-        response = json.loads(message)
-        if response['type'] == 'trade':
-            updates = {}
-            trades = response['data']
-
-            for trade in trades:
-                dt = datetime.fromtimestamp(trade['t']/1000.0)
-                tr_time = dt.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-                tr_ticker = trade['s']
-                tr_price = trade['p']
-                tr_volume = trade['v']
-                #print(f'{tr_time}: Ticker={tr_ticker}, Price={tr_price}, Volume={tr_volume}')
-                updates[f"{tr_ticker}|last_price"] = tr_price
-                updates[f"{tr_ticker}|volume"] = tr_volume
-                updates[f"{tr_ticker}|last_update_time"] = tr_time
-
-            self.async_loop.call_soon_threadsafe(lambda: self.update_message_queue.put_nowait(updates))
-        else:
-            logging.info(message)
-            # e.g. {"type":"ping"}
+    def _on_quote_received(self, quotes: List[ta.TDQuote]) -> None:
+        self.async_loop.call_soon_threadsafe(lambda: self.update_message_queue.put_nowait(quotes))
 
     def update_thread_handler(self) -> None:
         logging.info("update_thread_handler start")
@@ -137,24 +109,24 @@ class FinnhubServer(rtd.RTDServer):
         if self.shutdown:
             return
         
-        self.finnhub_cli.connect(self._on_recv_message, self.finnhub_token)
+        self.td_cli.connect(self._on_quote_received)
         self.ready_to_send.set()
         logging.debug("_update_msg_handler: ready_to_send.set()")
 
         while not self.shutdown:
-            msgs = await self.update_message_queue.get()
+            quotes = await self.update_message_queue.get()
             
             try:
                 # Check if any of our topics have new info to pass on
                 if not len(self.topics):
                     pass
 
-                # {"MSFT|last_price":166.79,"MSFT|volume":21266168,"MSFT|last_update_time":"09:48:54","CSCO|last_price":40.519,"CSCO|volume":11838414,"CSCO|last_update_time":"09:48:54","QCOM|volume":4211871,"HPQ|bid":21.12,"COF|volume":1096158,"DIS|volume":6656830}
-                if msgs:
-                    for k, v in msgs.items():
-                        ticker, field = k.split('|')
-                        if (ticker, field) in self.topics_by_key:
-                            topic = self.topics_by_key[(ticker, field)]
+                for quote in quotes:
+                    ticker = quote.ticker
+
+                    for k, v in quote.fields.items():
+                        if (ticker, k) in self.topics_by_key:
+                            topic = self.topics_by_key[(ticker, k)]
                             topic.Update(v)
 
                             if topic.HasChanged():
@@ -184,7 +156,7 @@ class FinnhubServer(rtd.RTDServer):
             msg = await self.send_message_queue.get()
             if msg:
                 logging.debug(f"_send_msg_handler: {msg}")
-                self.finnhub_cli.send(msg)
+                self.td_cli.send(msg)
 
     def CreateTopic(self, TopicId,  TopicStrings=None):
         """Topic factory. Builds a StockTickTopic object out of the given TopicStrings."""
@@ -193,24 +165,25 @@ class FinnhubServer(rtd.RTDServer):
             logging.info(f"CreateTopic {TopicId}, {ticker}|{field}")
             if not ticker:
                 return None
-
-            if ticker == "set_token":
-                self.finnhub_token = field
+            
+            if not self.start_conn_event.is_set():
                 self.start_conn_event.set()
 
-                new_topic = SimpeVarTopic(TopicId, TopicStrings)
-                self.topics_by_key[(ticker)] = field
-                self.updatedTopics[TopicId] = "Finnhub token set"
-            else:
-                new_topic = StockTickTopic(TopicId, TopicStrings)
-                ticker = ticker.upper()
-                self.topics_by_key[(ticker, field)] = new_topic
-                subscribe_msg = f"{{\"type\":\"subscribe\",\"symbol\":\"{ticker}\"}}"
-                logging.debug(subscribe_msg)
-                try:
-                    self.async_loop.call_soon_threadsafe(lambda: self.send_message_queue.put_nowait(subscribe_msg))
-                except Exception as e:
-                    logging.error("CreateTopic: {}".format(repr(e)))
+            new_topic = StockTickTopic(TopicId, TopicStrings)
+            ticker = ticker.upper()
+            self.topics_by_key[(ticker, field)] = new_topic
+            
+            subscribe_msg = {
+                "type": "subscribe",
+                "symbol": ticker,
+                "field": field
+            }
+
+            logging.debug(subscribe_msg)
+            try:
+                self.async_loop.call_soon_threadsafe(lambda: self.send_message_queue.put_nowait(subscribe_msg))
+            except Exception as e:
+                logging.error("CreateTopic: {}".format(repr(e)))
         else:
             logging.error(f"Unknown param: CreateTopic {TopicId}, {TopicStrings}")
             return None
@@ -249,7 +222,7 @@ class StockTickTopic(rtd.RTDTopic):
 
         # setup our initial value
         self.checkpoint = self.timestamp()
-        self.SetValue("#WatingDataFromFinnhub")
+        self.SetValue("#WatingDataForData")
 
     def __key(self):
         return (self.ticker, self.field)
@@ -272,11 +245,9 @@ class StockTickTopic(rtd.RTDTopic):
 if __name__ == "__main__":
     import win32com.server.register
 
-    # Register/Unregister FinnhubServer example
-    # eg. at the command line: finnhub_rtd.py --register
+    # Register/Unregister TDServer example
+    # eg. at the command line: td_rtd.py --register
     # Then type in an excel cell something like:
-    # =RTD("FINNHUB","","set_token","your_token_string")
-    # =RTD("FINNHUB","","MSFT","last_price")
-    # =RTD("FINNHUB","","BINANCE:BTCUSDT","last_price")
+    # =RTD("TD.RTD","","MSFT","last-price")
     
-    win32com.server.register.UseCommandLine(FinnhubServer)
+    win32com.server.register.UseCommandLine(TDServer)
