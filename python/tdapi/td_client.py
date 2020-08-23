@@ -9,7 +9,9 @@ import urllib
 from datetime import datetime
 from typing import List
 from typing import Dict
+from typing import Set
 from typing import Union
+from collections.abc import Iterable
 
 import websockets
 
@@ -151,6 +153,7 @@ class TDClient():
         self.async_thread = None
         self.async_loop = None
         self.message_queue = None
+        self.sub_queue = None
         self.shutdown = False
         self.connect_event = threading.Event()
         self.on_quote_received = None
@@ -160,6 +163,8 @@ class TDClient():
         self.fields_ids_dictionary = STREAM_FIELD_IDS
 
         self._requestid = 0
+        self.subscriptions = {}
+        self._outstanding_requests = set()
 
     def _async_thread_handler(self) -> None:
         logger.debug("_async_thread_handler")
@@ -169,16 +174,18 @@ class TDClient():
             asyncio.set_event_loop(loop)
             self.async_loop = loop
             self.message_queue = asyncio.Queue()
+            self.sub_queue = asyncio.Queue()
             login_request = self._build_login_request()
             loop.run_until_complete(self.conn.start(self.websocket_url, login_request))
             self.connect_event.set()
 
             send_messages_coro = self._send_message_async()
+            send_sub_coro = self._send_sub_message_async()
             recv_messages_coro = self._recv_message_async()
-            loop.run_until_complete(asyncio.gather(send_messages_coro, recv_messages_coro))
+            loop.run_until_complete(asyncio.gather(send_messages_coro, send_sub_coro, recv_messages_coro))
             loop.close()
         except Exception as e:
-            logger.error("_async_thread_handler: {}".format(repr(e)))
+            logger.error("_async_thread_handler: {}".format(repr(e)), exc_info=True)
             self.connect_event.set()
 
     async def _send_message_async(self) -> None:
@@ -189,6 +196,40 @@ class TDClient():
             else:
                 await self.conn.close()
 
+    async def _send_sub_message_async(self) -> None:
+        await asyncio.sleep(1)
+        while not self.shutdown:
+            while len(self._outstanding_requests) > 0:
+                await asyncio.sleep(0.5)
+            message = await self.sub_queue.get()
+            if not message:
+                await self.conn.close()
+                return
+            
+            symbols = set()
+            while True:
+                if message['type'] == 'subscribe':
+                    symbol = message['symbol']
+                    field = message['field']
+
+                    if symbol in self.subscriptions:
+                        self.subscriptions[symbol].add(field)
+                    else:
+                        self.subscriptions[symbol] = set(['0', field])
+
+                    symbols.add(symbol)
+                    if len(symbols) == 100:
+                        break
+                    if self.sub_queue.empty():
+                        break
+
+                    message = await self.sub_queue.get()
+
+            payload = self._level_one_quotes(symbols)
+
+            if payload:
+                await self.conn.send(payload)
+    
     async def _recv_message_async(self) -> None:
         # message types: "notify", "response", "data"
         # {"response":[{"service":"ADMIN","requestid":"0","command":"LOGIN","timestamp":1597561577408,"content":{"code":0,"msg":"08-4"}}]}
@@ -204,6 +245,8 @@ class TDClient():
             if 'data' in decoded_message:
                 self._handle_data(decoded_message['data'])
             elif 'response' in decoded_message:
+                for r in decoded_message['response']:
+                    self._outstanding_requests.remove(int(r['requestid']))
                 logging.debug(f'MsgRecv: response - {decoded_message}')
             elif 'notify' in decoded_message:
                 logging.debug(f'MsgRecv: notify - {decoded_message}')
@@ -224,6 +267,7 @@ class TDClient():
         # first get the current service request count
         #service_count = len(self.data_requests['requests']) + 1
         self._requestid += 1
+        self._outstanding_requests.add(self._requestid)
 
         request = {
             "service": None, 
@@ -239,7 +283,7 @@ class TDClient():
 
         return request
 
-    def _validate_argument(self, argument: Union[str, int], endpoint: str) -> Union[List[str], str]:
+    def _validate_argument(self, argument, endpoint: str) -> Union[List[str], str]:
         """Validate field arguments before submitting request.
 
         Arguments:
@@ -259,7 +303,7 @@ class TDClient():
         arg_list = []
 
         # see if the argument is a list or not.
-        if isinstance(argument, list):
+        if isinstance(argument, Iterable):
 
             for arg in argument:
 
@@ -297,6 +341,8 @@ class TDClient():
         [str] -- A JSON string with the login details.
 
         """        
+
+        self._outstanding_requests.add(0)
 
         # define a request
         login_request = {
@@ -378,35 +424,7 @@ class TDClient():
         else:
             raise ValueError('No Quality of Service Level provided.')
 
-    def _level_one_quote(self, symbol: str, field: str) -> str:
-        """
-            Represents the LEVEL ONE QUOTES endpoint for the TD Streaming API. This
-            will return quotes for a given list of symbols along with specified field information.
-
-            NAME: symbols
-            DESC: A List of symbols you wish to stream quotes for.
-            TYPE: List<String>
-
-            NAME: fields
-            DESC: The fields you want returned from the Endpoint, can either be the numeric representation
-                  or the key value representation. For more info on fields, refer to the documentation.
-            TYPE: List<Integer> | List<Strings>
-        """
-
-        # valdiate argument.
-        field = self._validate_argument(
-            argument=field, endpoint='level_one_quote')
-
-        # Build the request
-        request = self._new_request_template()
-        request['service'] = 'QUOTE'
-        request['command'] = 'SUBS'
-        request['parameters']['keys'] = symbol
-        request['parameters']['fields'] = ','.join(['0', field])
-
-        return json.dumps({"requests":[request]}, separators=(',', ':'))
-
-    def _level_one_quotes(self, symbols: List[str], fields: Union[List[str], List[int]]) -> None:
+    def _level_one_quote(self, symbol: str, fields: Union[List[str], List[int]]) -> str:
         """
             Represents the LEVEL ONE QUOTES endpoint for the TD Streaming API. This
             will return quotes for a given list of symbols along with specified field information.
@@ -429,18 +447,39 @@ class TDClient():
         request = self._new_request_template()
         request['service'] = 'QUOTE'
         request['command'] = 'SUBS'
-        request['parameters']['keys'] = ','.join(symbols)
+        request['parameters']['keys'] = symbol
         request['parameters']['fields'] = ','.join(fields)
 
         return json.dumps({"requests":[request]}, separators=(',', ':'))
 
-    def send(self, msg):
-        if msg['type'] == 'subscribe':
-            payload = self._level_one_quote(msg['symbol'], msg['field'])
+    def _level_one_quotes(self, symbols: Set) -> None:
+        #quote_requests = []
+        all_fields = set()
+        for symbol in symbols:
+            all_fields.update(self.subscriptions[symbol])
 
-        if payload:
-            self.async_loop.call_soon_threadsafe(lambda: self.message_queue.put_nowait(payload))
-    
+        fields = self._validate_argument(
+            argument=all_fields, endpoint='level_one_quote')
+        fields.sort(key=int)
+
+        # Build the request
+        request = self._new_request_template()
+        request['service'] = 'QUOTE'
+        request['command'] = 'SUBS'
+        request['parameters']['keys'] = ','.join(symbols)
+        request['parameters']['fields'] = ','.join(fields)
+        
+        return json.dumps({"requests":[request]}, separators=(',', ':'))
+        #return json.dumps({"requests":quote_requests}, separators=(',', ':'))
+
+    def send(self, msg):
+        if not msg:
+            self.async_loop.call_soon_threadsafe(lambda: self.message_queue.put_nowait(None))
+            return
+
+        if msg['type'] == 'subscribe':
+            self.async_loop.call_soon_threadsafe(lambda: self.sub_queue.put_nowait(msg))
+
     def close(self):
         self.shutdown = True
         self.send(None)
@@ -602,4 +641,3 @@ def create_td_client() -> TDClient:
         logging.debug(e)
 
     return streaming_session
-

@@ -155,7 +155,6 @@ class TDServer(rtd.RTDServer):
         while not self.shutdown:
             msg = await self.send_message_queue.get()
             if msg:
-                logging.debug(f"_send_msg_handler: {msg}")
                 self.td_cli.send(msg)
 
     def CreateTopic(self, TopicId,  TopicStrings=None):
