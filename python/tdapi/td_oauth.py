@@ -21,7 +21,7 @@ else:
     from td_config import USERPRINCIPALS_FILE_NAME, CREDENTIALS_FILE_NAME, API_ENDPOINT, API_VERSION, TOKEN_ENDPOINT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 logger.addHandler(logging.StreamHandler())
 
 app = Flask(__name__)

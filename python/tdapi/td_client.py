@@ -28,7 +28,7 @@ from .td_config import API_VERSION
 from .td_config import TOKEN_FILE_NAME
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 logger.addHandler(logging.StreamHandler())
 
 class TDWSConn(object):
@@ -185,6 +185,8 @@ class TDClient():
             recv_messages_coro = self._recv_message_async()
             loop.run_until_complete(asyncio.gather(send_messages_coro, send_sub_coro, recv_messages_coro))
             loop.close()
+        except websockets.exceptions.ConnectionClosedOK:
+            pass
         except Exception as e:
             logger.error("_async_thread_handler: {}".format(repr(e)), exc_info=True)
             self.connect_event.set()
