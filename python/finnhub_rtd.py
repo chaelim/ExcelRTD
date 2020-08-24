@@ -20,7 +20,7 @@ LOG_FILE_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'log
 LOG_FILENAME = os.path.join(LOG_FILE_FOLDER, 'Finnhub_{:%Y%m%d_%H%M%S}.log'.format(datetime.now()))
 
 # Finnhub token can be set here or pass the token through "set_token" command using RTD (see demo\Finnhub_rtd_demo.xlsx)
-FINHUB_TOKEN = "bsacbsvrh5rfukjh2o0g"
+FINHUB_TOKEN = ""
 
 if not os.path.exists(LOG_FILE_FOLDER):
     os.makedirs(LOG_FILE_FOLDER)

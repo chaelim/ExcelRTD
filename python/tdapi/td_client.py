@@ -15,15 +15,17 @@ from collections.abc import Iterable
 
 import websockets
 
+from .td_oauth import silent_sso, run_full_oauth_subprocess
+from .td_oauth import load_token
 from .fields import CSV_FIELD_KEYS
 from .fields import CSV_FIELD_KEYS_LEVEL_2
 from .fields import STREAM_FIELD_IDS
 from .fields import LEVEL_ONE_QUOTE_KEY_LIST
 from .fields import LEVEL_ONE_QUOTE_VALUE_LIST
 
-from .config import API_ENDPOINT
-from .config import API_VERSION
-from .config import TOKEN_FILE_NAME
+from .td_config import API_ENDPOINT
+from .td_config import API_VERSION
+from .td_config import TOKEN_FILE_NAME
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -44,7 +46,6 @@ class TDWSConn(object):
         return message
 
     async def start(self, url, initial_request) -> None:
-        logger.debug("start")
         try:
             self.ws = await websockets.connect(url)
             await self.send(initial_request)
@@ -576,30 +577,12 @@ def _create_token_timestamp(token_timestamp: str) -> int:
     return token_timestamp
 
 def create_td_client() -> TDClient:
-    """Creates a new streaming session with the TD API.
-
-    Grab the token to authenticate a stream session, builds
-    the credentials payload, and initalizes a new instance
-    of the TDStream client.
-
-    Usage:
-    ----
-        >>> td_session = TDClient(
-            client_id='<CLIENT_ID>',
-            redirect_uri='<REDIRECT_URI>',
-            credentials_path='<CREDENTIALS_PATH>'
-        )
-        >>> td_session.login()
-        >>> td_stream_session = td_session.create_streaming_session()
-
-    Returns:
-    ----
-    TDStreamerClient -- A new instance of a Stream Client that can be
-        used to subscribe to different streaming services.
-    """
     try:
-        with open(TOKEN_FILE_NAME, 'r') as json_file:
-            token_data = json.load(json_file)
+        if not silent_sso():
+            logging.info('silent_sso failed. Running full oauth')
+            run_full_oauth_subprocess()
+
+        token_data = load_token()
 
         # Grab the Streamer Info.
         userPrincipalsResponse = get_user_principals(
@@ -638,6 +621,6 @@ def create_td_client() -> TDClient:
             credentials=credentials
         )
     except Exception as e:
-        logging.debug(e)
+        logging.error(e, exc_info=True)
 
     return streaming_session

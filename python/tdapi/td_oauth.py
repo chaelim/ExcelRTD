@@ -8,11 +8,17 @@ import os
 import pickle
 import requests
 import time
+import win32crypt
 
 from typing import Dict
 from typing import List
 
-import config
+if __package__:
+    from .td_config import APPDATA_PATH, CLIENT_ID, CLIENT_ID_AUTH, REDIRECT_URI, AUTHORIZATION_BASE_URL, TOKEN_URL, TOKEN_FILE_NAME
+    from .td_config import USERPRINCIPALS_FILE_NAME, CREDENTIALS_FILE_NAME, API_ENDPOINT, API_VERSION, TOKEN_ENDPOINT
+else:
+    from td_config import APPDATA_PATH, CLIENT_ID, CLIENT_ID_AUTH, REDIRECT_URI, AUTHORIZATION_BASE_URL, TOKEN_URL, TOKEN_FILE_NAME
+    from td_config import USERPRINCIPALS_FILE_NAME, CREDENTIALS_FILE_NAME, API_ENDPOINT, API_VERSION, TOKEN_ENDPOINT
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -20,8 +26,8 @@ logger.addHandler(logging.StreamHandler())
 
 app = Flask(__name__)
 
-if not os.path.exists(config.APPDATA_PATH):
-    os.makedirs(config.APPDATA_PATH)
+if not os.path.exists(APPDATA_PATH):
+    os.makedirs(APPDATA_PATH)
 
 @app.route("/")
 def demo():
@@ -31,11 +37,11 @@ def demo():
     using an URL with a few key OAuth parameters.
     """
     td_session = OAuth2Session(
-        client_id=config.CLIENT_ID_AUTH,
-        redirect_uri=config.REDIRECT_URI
+        client_id=CLIENT_ID_AUTH,
+        redirect_uri=REDIRECT_URI
     )
 
-    authorization_url, state = td_session.authorization_url(config.AUTHORIZATION_BASE_URL)
+    authorization_url, state = td_session.authorization_url(AUTHORIZATION_BASE_URL)
 
     # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
@@ -53,12 +59,12 @@ def callback():
     in the redirect URL. We will use that to obtain an access token.
     """
     td_session = OAuth2Session(
-        client_id=config.CLIENT_ID_AUTH,
-        redirect_uri=config.REDIRECT_URI,
+        client_id=CLIENT_ID_AUTH,
+        redirect_uri=REDIRECT_URI,
         state=session['oauth_state']
     )
     token = td_session.fetch_token(
-        config.TOKEN_URL,
+        TOKEN_URL,
         access_type='offline',
         authorization_response=request.url,
         include_client_id=True
@@ -72,16 +78,14 @@ def callback():
     save_token(token)
 
     # Grab the Streamer Info.
-    userPrincipalsResponse = get_user_principals(
-        token,
-        fields=['streamerConnectionInfo', 'streamerSubscriptionKeys', 'preferences', 'surrogateIds'])
+    #userPrincipalsResponse = get_user_principals(
+    #    token,
+    #    fields=['streamerConnectionInfo', 'streamerSubscriptionKeys', 'preferences', 'surrogateIds'])
 
-    if userPrincipalsResponse:
-        save_credentials(userPrincipalsResponse)
+    #if userPrincipalsResponse:
+    #    save_credentials(userPrincipalsResponse)
 
     return redirect(url_for('shutdown'))
-
-    #return jsonify(token)
 
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
@@ -98,7 +102,7 @@ def shutdown():
 def profile():
     """Fetching a protected resource using an OAuth 2 token.
     """
-    td_session = OAuth2Session(config.CLIENT_ID, token=session['oauth_token'])
+    td_session = OAuth2Session(CLIENT_ID, token=session['oauth_token'])
     return jsonify(td_session.get('https://api.td_session.com/user').json())
 
 def get_token():
@@ -171,10 +175,20 @@ def get_user_principals(token, fields: List[str]) -> Dict:
     else:
         return None
 
-def save_token(token_dict: dict) -> dict:
+def load_token():
+    try:
+        with open(TOKEN_FILE_NAME, 'rb') as encoded_file:
+            encoded_data = encoded_file.read()
+            token_data = json.loads(win32crypt.CryptUnprotectData(encoded_data)[1].decode())
+
+        return token_data
+    except Exception as e:
+        return None
+
+def save_token(token_dict: dict) -> bool:
     # make sure there is an access token before proceeding.
     if 'access_token' not in token_dict:
-        return None
+        return False
 
     token_data = {}
 
@@ -191,10 +205,15 @@ def save_token(token_dict: dict) -> dict:
     token_data['refresh_token_expires_at_date'] = datetime.datetime.fromtimestamp(refresh_token_expire).isoformat()
     token_data['logged_in'] = True
 
-    with open(config.TOKEN_FILE_NAME, 'w') as json_file:
-        json.dump(obj=token_data, fp=json_file, indent=4)
+    token_json = json.dumps(token_data)
+    try:
+        with open(TOKEN_FILE_NAME, 'wb') as encoded_file:
+            enc = win32crypt.CryptProtectData(token_json.encode())
+            encoded_file.write(enc)
+    except Exception as e:
+        return False
 
-    return token_data
+    return True
 
 def save_credentials(userPrincipalsResponse):
     # Grab the timestampe.
@@ -223,10 +242,10 @@ def save_credentials(userPrincipalsResponse):
         "acl": userPrincipalsResponse['streamerInfo']['acl']
     }
 
-    with open(file=config.USERPRINCIPALS_FILE_NAME, mode='w+') as json_file:
+    with open(file=USERPRINCIPALS_FILE_NAME, mode='w+') as json_file:
         json.dump(obj=userPrincipalsResponse, fp=json_file, indent=4)
 
-    with open(file=config.CREDENTIALS_FILE_NAME, mode='w+') as json_file:
+    with open(file=CREDENTIALS_FILE_NAME, mode='w+') as json_file:
         json.dump(obj=credentials, fp=json_file, indent=4)
 
 def _token_seconds(token_data, token_type: str = 'access_token') -> int:
@@ -281,14 +300,14 @@ def grab_refresh_token(access_token, refresh_token) -> bool:
 
     # build the parameters of our request
     data = {
-        'client_id': config.CLIENT_ID_AUTH,
+        'client_id': CLIENT_ID_AUTH,
         'grant_type': 'refresh_token',
         'access_type': 'offline',
         'refresh_token': refresh_token
     }
 
     # build url: https://api.tdameritrade.com/v1/oauth2/token
-    parts = [config.API_ENDPOINT, config.API_VERSION, config.TOKEN_ENDPOINT]
+    parts = [API_ENDPOINT, API_VERSION, TOKEN_ENDPOINT]
     url = '/'.join(parts)
 
     # Define a new session.
@@ -318,8 +337,7 @@ def grab_refresh_token(access_token, refresh_token) -> bool:
 
 def silent_sso() -> bool:
     try:
-        with open(config.TOKEN_FILE_NAME, 'r') as json_file:
-            token_data = json.load(json_file)
+        token_data = load_token()
 
         # if the current access token is not expired then we are still authenticated.
         if _token_seconds(token_data, token_type='access_token') > 0:
@@ -334,22 +352,26 @@ def silent_sso() -> bool:
             return True
     except Exception as e:
         print(repr(e))
-        pass
+        return False
 
-    return False
+    return True
+
+def _run_full_oauth() -> None:
+    import webbrowser
+    webbrowser.open_new_tab('https://localhost:8080/')
+
+    app.secret_key = os.urandom(24)
+    app.run(ssl_context='adhoc', host="localhost", port=8080, debug=False)
+
+def run_full_oauth_subprocess() -> None:
+    from subprocess import run
+    run(["python", os.path.realpath(__file__)], cwd= os.path.dirname(os.path.realpath(__file__)))
 
 if __name__ == "__main__":
-    # This allows us to use a plain HTTP callback
-    #os.environ['DEBUG'] = "1"
-    import webbrowser
     import sys
 
     # Check if current token is valid
     if silent_sso():
         sys.exit(0)
-
-    webbrowser.open_new_tab('https://localhost:8080/')
-
-    app.secret_key = os.urandom(24)
-    context = ('localhost.crt', 'localhost.key')
-    app.run(ssl_context=context, host="localhost", port=8080, debug=False)
+    else:
+        _run_full_oauth()

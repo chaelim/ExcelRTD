@@ -24,7 +24,7 @@ if not os.path.exists(LOG_FILE_FOLDER):
 
 logging.basicConfig(
     filename=LOG_FILENAME,
-    level=logging.DEBUG,
+    level=logging.ERROR,
     format="%(asctime)s:%(levelname)s:%(message)s"
 )
 

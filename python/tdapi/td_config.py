@@ -12,7 +12,7 @@ REDIRECT_URI = "https://localhost:8080/callback"
 APPDATA_PATH = os.path.join(os.getenv('APPDATA'), 'TD_ExcelRTD')
 
 TOKEN_URL = 'https://api.tdameritrade.com/v1/oauth2/token'
-TOKEN_FILE_NAME = os.path.join(APPDATA_PATH, 'token.json')
+TOKEN_FILE_NAME = os.path.join(APPDATA_PATH, 'token.enc')
 USERPRINCIPALS_FILE_NAME = os.path.join(APPDATA_PATH, 'user_principals.json')
 CREDENTIALS_FILE_NAME = os.path.join(APPDATA_PATH, 'credentials.json')
 
