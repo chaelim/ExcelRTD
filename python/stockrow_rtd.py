@@ -39,7 +39,8 @@ _STOCKROW_TICKERS_IN_ONE_REQUESTS = 30
 
 class StockrowServer(rtd.RTDServer):
     _reg_clsid_ = '{C38E586E-C6B9-41B2-9C99-88180E2B9DB8}'
-    _reg_progid_ = 'STOCKROW'
+    _reg_progid_ = 'Stockrow'
+    #_reg_progid_ = 'Stockrow.RTD'
     _reg_desc_ = "RTD server for realtime stock quote using stockrow.com"
 
     # other class attributes...

@@ -30,7 +30,7 @@
 
 * To install Python Excel RTD COM server:
     * Type `py <python file name> --register`
-    * e.g. ``py stockrow_rtd.py --register``
+    * e.g. `py stockrow_rtd.py --register`
 
 ## Change `RTDThrottleInterval` to zero (recommended)
 
