@@ -45,3 +45,7 @@
 ## Stockrow RTD demo
 
 ![](demo/stockrow_rtd_demo1.gif)
+
+## TD RTD Demo
+
+![](demo/td_rtd_demo.gif)
