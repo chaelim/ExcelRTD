@@ -19,7 +19,7 @@
 
 ## Security Concerns
 
-* As mentioned above, the OAuth token is encrypted with your Windows account credential and stored under %APPDATA% folder. Unless somebody can log in or unlock using your Windows account credential, it cant' be decryted easily.
+* As mentioned above, the OAuth token is encrypted with your Windows account credential and stored under %APPDATA% folder. Unless somebody can log in or unlock using your Windows account credential, it cant' be decrypted easily.
 * TD RTD only sends quote request and response to TD Ameritrade server.
 * Never send any other information to any unknown servers.
 
