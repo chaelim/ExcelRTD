@@ -1,6 +1,6 @@
 # TD Ameritrade RTD
 
-## Caveats
+## Caveat
 
 > This is still under development and haven't been tested extensively. You may exprience various issues. Also the Python code quality is not where I want to be yet.
 
@@ -20,5 +20,7 @@
 ## Demo
 
 [TD RTD Demo workbook](https://github.com/chaelim/ExcelRTD/blob/master/python/demo/TD_rtd_demo.xlsx)
+
+> It's actual normal update speed not fast forward play.
 
 ![](demo/td_rtd_demo.gif)
