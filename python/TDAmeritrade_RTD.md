@@ -9,6 +9,10 @@
 * TD Ameritrade offers Level I and II live stream quotes free of charge if you have an account with them. (You can open an account without any deposit). See https://www.tdameritrade.com/api.page for more details.
 * This Excel TD RTD utilizes the Level I live stream quotes to update TD RTD stockquote function in Excel in realtime.
 
+## How to install
+
+* Please follow instructions in https://github.com/chaelim/ExcelRTD/blob/master/python/README.md
+
 ## Features
 
 * Automatic OAuth login to your TD Ameritrade account via web browser.
