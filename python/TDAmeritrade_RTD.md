@@ -11,7 +11,8 @@
 
 ## How to install
 
-* Please follow instructions in https://github.com/chaelim/ExcelRTD/blob/master/python/README.md
+* Please follow instructions in the [README](https://github.com/chaelim/ExcelRTD/blob/master/python/README.md)
+* Run `py td_rtd.py --register` to register TD RTD.
 
 ## Features
 
