@@ -27,6 +27,6 @@
 
 [TD RTD Demo workbook](https://github.com/chaelim/ExcelRTD/blob/master/python/demo/TD_rtd_demo.xlsx)
 
-> It's actual normal update speed not fast forward play.
+> This is actual normal update speed not fast-forward play.
 
 ![](demo/td_rtd_demo.gif)
