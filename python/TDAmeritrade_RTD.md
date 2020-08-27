@@ -2,7 +2,7 @@
 
 ## Caveat
 
-> This is still under development and haven't been tested extensively. You may exprience various issues. Also the Python code quality is not where I want to be yet.
+> This project is work in progress and haven't been tested extensively. You may exprience various issues. Also the Python code quality is not where I want to be yet.
 
 ## Introduction
 
@@ -18,9 +18,9 @@
 
 * Automatic OAuth login to your TD Ameritrade account via web browser.
 * Refresh token is encrypted and stored under %APPDATA% folder.
-* Currently supports all Level I livet stream quotes.
+* Currently supports all Level I live stream quotes.
     * [Level I Quote Document from TD](https://developer.tdameritrade.com/content/streaming-data#_Toc504640597)
-    * For full  fleld list look for `level_one_quote` in [fields.py](https://github.com/chaelim/ExcelRTD/blob/master/python/tdapi/fields.py)
+    * For full fleld list look for `level_one_quote` in [fields.py](https://github.com/chaelim/ExcelRTD/blob/master/python/tdapi/fields.py)
 
 ## Security Concerns
 
