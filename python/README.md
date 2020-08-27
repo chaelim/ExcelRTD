@@ -48,4 +48,4 @@
 
 ## TD RTD Demo
 
-![](demo/td_rtd_demo.gif)
+> Look at [TD Ameritrade RTD](https://github.com/chaelim/ExcelRTD/blob/master/python/TDAmeritrade_RTD.md)
