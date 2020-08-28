@@ -40,12 +40,16 @@
   1. Type this command line `reg add HKCU\SOFTWARE\Microsoft\Office\16.0\Excel\Options /v RTDThrottleInterval /t REG_DWORD /d 0 /f`
   2. Run `DisableThrottling.reg` (You can double click this from the explorer)
 
-# Demo
+# Python RTD implementation
 
-## Stockrow RTD demo
+## TD Ameritrade RTD (`td_rtd.py`)
 
-![](demo/stockrow_rtd_demo1.gif)
-
-## TD Ameritrade RTD Demo
+* Getting Level I realtime quote from the TD Ameritrade using websocket stereaming data.
 
 > Look at [TD Ameritrade RTD](https://github.com/chaelim/ExcelRTD/blob/master/python/TDAmeritrade_RTD.md)
+
+## Stockrow RTD (`stockrow_rtd.py`)
+
+* Periodically query stock quotes to stockrow.com.
+
+![](demo/stockrow_rtd_demo1.gif)
