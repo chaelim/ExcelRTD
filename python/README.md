@@ -46,6 +46,6 @@
 
 ![](demo/stockrow_rtd_demo1.gif)
 
-## TDAmeritrade RTD Demo
+## TD Ameritrade RTD Demo
 
 > Look at [TD Ameritrade RTD](https://github.com/chaelim/ExcelRTD/blob/master/python/TDAmeritrade_RTD.md)
