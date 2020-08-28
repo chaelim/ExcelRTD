@@ -11,7 +11,7 @@
 
 ## How to install
 
-* Please follow instructions in the [README](https://github.com/chaelim/ExcelRTD/blob/master/python/README.md)
+* First, please follow the instructions in the [README](https://github.com/chaelim/ExcelRTD/blob/master/python/README.md)
 * Run `py td_rtd.py --register` to register TD RTD.
 
 ## Features
@@ -31,8 +31,6 @@
 
 ## Demo
 
-[TD RTD Demo workbook](https://github.com/chaelim/ExcelRTD/blob/master/python/demo/TD_rtd_demo.xlsx)
-
-> This is actual normal update speed not fast-forward play.
+* [TD RTD Demo workbook](https://github.com/chaelim/ExcelRTD/blob/master/python/demo/TD_rtd_demo.xlsx).
 
 ![](demo/td_rtd_demo.gif)
