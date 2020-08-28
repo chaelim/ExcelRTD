@@ -3,7 +3,7 @@
 ExcelRTD project aims provides a collection of samples implementing Excel RTD (RealTimeData) COM servers.
 Each sample can be useful by itself or will give some Excel RTD impementation ideas.
 
-> See Introduction on RTD (RealTimeData) in Excel [Intro RTD](https://docs.microsoft.com/en-us/office/troubleshoot/excel/set-up-realtimedata-function) and Kenny Kerr's Excel [RTD articles](https://kennykerr.ca/articles/)
+> For introduction on Excel RTD (RealTimeData), visit [Intro RTD](https://docs.microsoft.com/en-us/office/troubleshoot/excel/set-up-realtimedata-function) and Kenny Kerr's Excel [RTD articles](https://kennykerr.ca/articles/)
 
 ## Python implementations
 
