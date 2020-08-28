@@ -44,9 +44,13 @@
 
 ## TD Ameritrade RTD (`td_rtd.py`)
 
-* Getting Level I realtime quote from the TD Ameritrade using websocket stereaming data.
+* Getting Level I realtime quote from the TD Ameritrade via websocket stereaming data.
 
 > Look at [TD Ameritrade RTD](https://github.com/chaelim/ExcelRTD/blob/master/python/TDAmeritrade_RTD.md)
+
+## Finnhub RTD (`finnhub_rtd.py`)
+
+* Getting real time price update [Finnhub Stock API](https://finnhub.io/docs/api) via websocket.
 
 ## Stockrow RTD (`stockrow_rtd.py`)
 
