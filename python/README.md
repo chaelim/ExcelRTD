@@ -26,17 +26,17 @@
 
 * Run `pip install -r requirements.txt` or `py -m pip install -r requirements.txt`
 
-## How to register a Python RTD
+## How to register Python RTD
 
 * To install Python Excel RTD COM server:
     * Type `py <python file name> --register`
     * e.g. `py stockrow_rtd.py --register`
 
-## Change `RTDThrottleInterval` to zero (recommended)
+## Change `RTDThrottleInterval` to zero (strongly recommended)
 
 * By setting `RTDThrottleInterval` to zero, any update from the RTD COM server will be refreshed to Excel as quickly as possible.
 
-* Use either of following ways to change `RTDThrottleInterval` value to zero
+* Use one of following ways to change `RTDThrottleInterval` value to zero
   1. Type this command line `reg add HKCU\SOFTWARE\Microsoft\Office\16.0\Excel\Options /v RTDThrottleInterval /t REG_DWORD /d 0 /f`
   2. Run `DisableThrottling.reg` (You can double click this from the explorer)
 
