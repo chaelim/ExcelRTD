@@ -16,8 +16,8 @@
 
 ## Features
 
-* Automatic OAuth login to your TD Ameritrade account via web browser.
-* Refresh token is encrypted and stored under `%APPDATA%` folder.
+* Automatic OAuth login to your TD Ameritrade account via web browser and the refresh token will be saved for next login.
+* Refresh token is encrypted and stored under `%APPDATA%` folder. As long as your refresh token is valid, no OAuth login in is necessary.
 * Currently supports all Level I live stream quotes via [TD Ameritrade Streaming Data](https://developer.tdameritrade.com/content/streaming-data).
     * [TD Level I Quote Document](https://developer.tdameritrade.com/content/streaming-data#_Toc504640597).
     * For full fleld list look for `level_one_quote` in [fields.py](https://github.com/chaelim/ExcelRTD/blob/master/python/tdapi/fields.py).
