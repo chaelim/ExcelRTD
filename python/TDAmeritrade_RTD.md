@@ -20,13 +20,13 @@
 * Refresh token is encrypted and stored under `%APPDATA%` folder. As long as your refresh token is valid, no OAuth login is necessary.
 * Currently supports all Level I live stream quotes via [TD Ameritrade Streaming Data](https://developer.tdameritrade.com/content/streaming-data).
     * [TD Level I Quote Document](https://developer.tdameritrade.com/content/streaming-data#_Toc504640597).
-    * For full fleld list look for `level_one_quote` in [fields.py](https://github.com/chaelim/ExcelRTD/blob/master/python/tdapi/fields.py).
+    * For full field list look for `level_one_quote` in [fields.py](https://github.com/chaelim/ExcelRTD/blob/master/python/tdapi/fields.py).
 * Unlike the `tos.rtd` provided by ThinkorSwim platform, you don't need to install and run the TOS softfware to use the RTD in Excel.
 
 ## Security Concerns
 
-* As mentioned above, the OAuth token is encrypted with your Windows account credential and stored under %APPDATA% folder. Unless somebody can log in or unlock using your Windows account credential, it cant' be decrypted easily.
-* TD RTD only sends quote request and response to TD Ameritrade server.
+* As mentioned above, the OAuth token is encrypted with your Windows account credential and stored under `%APPDATA%` folder. Unless somebody can log in or unlock the machine using your Windows account credential, it can't be easily decrypted.
+* TD RTD only sends quote requests to the TD Ameritrade server.
 * Never send any other information to any unknown servers.
 
 ## Demo
