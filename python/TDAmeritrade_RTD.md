@@ -21,7 +21,7 @@
 * Currently supports all Level I live stream quotes via [TD Ameritrade Streaming Data](https://developer.tdameritrade.com/content/streaming-data).
     * [TD Level I Quote Document](https://developer.tdameritrade.com/content/streaming-data#_Toc504640597).
     * For full field list look for `level_one_quote` in [fields.py](https://github.com/chaelim/ExcelRTD/blob/master/python/tdapi/fields.py).
-* Unlike the `tos.rtd` provided by ThinkorSwim platform, you don't need to install and run the TOS softfware to use the RTD in Excel.
+* Unlike the `tos.rtd` provided by the ThinkorSwim platform from TD Ameritrade, you don't need to install and run the TOS software to use this TD RTD in Excel.
 
 ## Security Concerns
 
